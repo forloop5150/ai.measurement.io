@@ -1,11 +1,13 @@
 ## Workflow
 1. generate an HTML report that shows usage metrics in my organization for Claude Code
-2. Track usage for all members in my Organizations API Plan by month 
+2. Track usage for all members in my Organizations API Plan by month
 3. Show the metrics for each month this year
-4. Put the metrics in a bar chart where each bar represents a month and the height of the bar represents the total number of requests for that month.
-5. Add a pie chart that shows a summary of requests for each model
-6. Show a tabular report that shows totals requests per month for each user. Just show the user's name, not their email in the report. 
-7. Show another tabular report that shows total uaer requests for each model. Just show the user's name, not their email in the report.
+4. Put the metrics in a bar chart where each bar represents a month and the height of the bar represents the total number of tokens for that month.
+5. Add a pie chart that shows a summary of tokens for each model
+6. Show a tabular report that shows total tokens per month for each user. Just show the user's name, not their email in the report.
+7. Show another tabular report that shows total user tokens for each model. Just show the user's name, not their email in the report.
+
+Note: the Anthropic Admin API's messages usage report exposes token counts (uncached input + cache creation + cache read + output), not raw request counts, so "tokens" is the trackable metric here.
 
 ## Rules
 - use the ai.measurement.io repository to generate the report
