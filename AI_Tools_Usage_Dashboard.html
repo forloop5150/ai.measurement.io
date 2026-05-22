@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Claude Code Usage Dashboard — Vestwell Engineering</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e334d;
+      --text: #e8eaf6;
+      --text-muted: #8b90b8;
+      --claude: #d97706;
+      --accent: #5b6af0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .header-left h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .header-left p { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+
+    .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .controls label { color: var(--text-muted); font-size: 12px; }
+    .controls select, .controls input[type="month"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+    .controls input[type="month"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+    .btn { background: var(--accent); color: white; border: none; border-radius: 6px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+    main { padding: 24px 28px; max-width: 1400px; }
+
+    .live-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(35,134,54,0.15); border: 1px solid rgba(35,134,54,0.4); color: #3fb950; border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; margin-left: 10px; }
+    .live-badge::before { content: ''; width: 6px; height: 6px; background: #3fb950; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    .note { font-size: 11px; color: var(--text-muted); padding: 10px 14px; background: var(--surface2); border-radius: 6px; border-left: 3px solid var(--claude); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .note strong { color: var(--text); }
+
+
+    /* KPI */
+    .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+    .kpi.accent-top { border-top: 3px solid var(--claude); }
+    .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
+    .kpi .value { font-size: 26px; font-weight: 700; margin-top: 6px; line-height: 1; }
+    .kpi .sub { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+    .kpi .trend { font-size: 11px; margin-top: 4px; }
+    .trend.up { color: #3fb950; }
+    .trend.down { color: #f87171; }
+
+    /* Cards */
+    .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .chart-row-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+    .card h3 { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+    /* Table */
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { text-align: left; padding: 10px 12px; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
+    thead th:hover { color: var(--text); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 10px 12px; }
+    .user-cell { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .api-tag { font-size: 10px; background: rgba(255,255,255,0.07); color: var(--text-muted); border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
+
+    .bar-cell { display: flex; align-items: center; gap: 7px; }
+    .mini-bar { height: 6px; border-radius: 3px; min-width: 2px; background: var(--claude); }
+
+
+    @media (max-width: 720px) {
+      .chart-row, .chart-row-3 { grid-template-columns: 1fr; }
+      main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>⚡ Claude Code Usage Dashboard <span class="live-badge">Live Data</span></h1>
+    <p>Vestwell Engineering · Claude Code · Jan–May 2026</p>
+  </div>
+  <div class="controls">
+    <label>From</label>
+    <input type="month" id="monthFrom" value="2026-01" min="2026-01" max="2026-05" />
+    <label>To</label>
+    <input type="month" id="monthTo" value="2026-05" min="2026-01" max="2026-05" />
+    <select id="userFilter"><option value="all">All Users</option></select>
+    <button class="btn" onclick="render()">Apply</button>
+    <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+  </div>
+</header>
+
+<main>
+  <div id="toolContent"></div>
+</main>
+
+<script>
+// ─── REAL DATA FROM ANTHROPIC CONSOLE ─────────────────────────────────────────
+// Sourced live from platform.claude.com/claude-code — January through May 2026
+// Apr 2026 data last refreshed: April 29, 2026 (MTD, 29 days into month; 330,487 total lines on console)
+// May 2026 data last refreshed: May 1, 2026 (MTD, 1 day into month; 4,322 total lines on console)
+// Note: The console shows all active users per month. Users with 0 lines are omitted only if absent from console.
+// "Requests" are not surfaced by the console; Lines of Code and Spend are the available metrics.
+
+const CLAUDE_DATA = {
+  '2026-01': [
+    { user: 'moshe.bildner@vestwell.com',                        lines: 39754, spend: 238.21 },
+    { user: 'claude_code_key_d.soundarapandyan_yusa [API Key]',  lines: 3644,  spend: 26.83  },
+    { user: 'pycharm-key [API Key]',                             lines: 2891,  spend: 28.37  },
+    { user: 'd.soundarapandyan@vestwell.com',                    lines: 393,   spend: 22.21  },
+    { user: 'duncan-test-key [API Key]',                         lines: 56,    spend: 1.98   },
+    { user: 'rob.molchon@vestwell.com',                          lines: 0,     spend: 0.28   },
+  ],
+  '2026-02': [
+    { user: 'moshe.bildner@vestwell.com',         lines: 105341, spend: 1020.93 },
+    { user: 'pycharm-key [API Key]',              lines: 7210,   spend: 62.21   },
+    { user: 'd.soundarapandyan@vestwell.com',     lines: 542,    spend: 27.57   },
+    { user: 'travis.stevens@vestwell.com',        lines: 465,    spend: 30.01   },
+    { user: 'duncan-test-key [API Key]',          lines: 454,    spend: 3.61    },
+    { user: 'harshitha.pasupuleti@vestwell.com',  lines: 403,    spend: 1.37    },
+    { user: 'rob.molchon@vestwell.com',           lines: 206,    spend: 0.65    },
+  ],
+  '2026-03': [
+    { user: 'moshe.bildner@vestwell.com',         lines: 59068,  spend: 737.35  },
+    { user: 'adam.kirschner@vestwell.com',        lines: 37820,  spend: 523.45  },
+    { user: 'alan.xian@vestwell.com',             lines: 17690,  spend: 355.00  },
+    { user: 'thomas.whidden@vestwell.com',        lines: 16524,  spend: 164.19  },
+    { user: 'crobs-final-key [API Key]',          lines: 14247,  spend: 236.58  },
+    { user: 'harshitha.pasupuleti@vestwell.com',  lines: 11914,  spend: 81.78   },
+    { user: 'chris.robinson@vestwell.com',        lines: 8442,   spend: 109.07  },
+    { user: 'manuel.rueda@vestwell.com',          lines: 7541,   spend: 59.05   },
+    { user: 'dane_claude_key [API Key]',          lines: 7409,   spend: 87.80   },
+    { user: 'nikhil.nandakumar@vestwell.com',     lines: 7323,   spend: 148.14  },
+  ],
+  '2026-04': [
+    { user: 'moshe.bildner@vestwell.com',                              lines: 65563, spend: 706.09 },
+    { user: 'reese-claude-Y75Q6M4LF0 [API Key]',                      lines: 60004, spend: 319.47 },
+    { user: 'adam.kirschner@vestwell.com',                             lines: 43096, spend: 389.47 },
+    { user: 'alan.xian@vestwell.com',                                  lines: 18445, spend: 188.48 },
+    { user: 'david.reyes@vestwell.com',                                lines: 14979, spend: 182.84 },
+    { user: 'dane_claude_key [API Key]',                               lines: 14692, spend: 375.70 },
+    { user: 'crobs-final-key [API Key]',                               lines: 13824, spend: 318.34 },
+    { user: 'thomas.whidden@vestwell.com',                             lines: 13099, spend: 133.79 },
+    { user: 'harshitha.pasupuleti@vestwell.com',                       lines: 9118,  spend: 131.56 },
+    { user: 'claude-code-cli [API Key]',                               lines: 8953,  spend: 87.87  },
+    { user: 'sinan.topgul@vestwell.com',                               lines: 7600,  spend: 247.48 },
+    { user: 'dave.smith@vestwell.com',                                 lines: 7150,  spend: 54.84  },
+    { user: 'derek.nguyen@vestwell.com',                               lines: 6866,  spend: 24.86  },
+    { user: 'lawrence.norton@vestwell.com',                            lines: 5678,  spend: 47.43  },
+    { user: 'joona.hamad@vestwell.com',                                lines: 5354,  spend: 21.72  },
+    { user: 'scott-api-key [API Key]',                                 lines: 4679,  spend: 5.92   },
+    { user: 'd.soundarapandyan@vestwell.com',                          lines: 4315,  spend: 50.84  },
+    { user: 'yury-tilis-dev [API Key]',                                lines: 3641,  spend: 99.52  },
+    { user: 'steve-kosarin-claude [API Key]',                          lines: 3394,  spend: 163.12 },
+    { user: 'manuel.rueda@vestwell.com',                               lines: 2989,  spend: 19.85  },
+    { user: 'anthony.verslues@vestwell.com',                           lines: 2927,  spend: 183.23 },
+    { user: 'michael.dafferner@vestwell.com',                          lines: 2833,  spend: 184.40 },
+    { user: 'clayton.howeth@vestwell.com',                             lines: 2643,  spend: 55.39  },
+    { user: 'claude_code_key_derek.nguyen_mvpr [API Key]',             lines: 1804,  spend: 13.75  },
+    { user: 'samuel-kane-claude [API Key]',                            lines: 1324,  spend: 5.18   },
+    { user: 'moshe-autonomous-agent-runner-pre-alpha [API Key]',       lines: 1259,  spend: 39.41  },
+    { user: 'brad.plies-manual-key [API Key]',                         lines: 1242,  spend: 21.73  },
+    { user: 'nikhil.nandakumar@vestwell.com',                          lines: 800,   spend: 40.91  },
+    { user: 'tstevens-personal [API Key]',                             lines: 479,   spend: 12.19  },
+    { user: 'brandon.konoiko@vestwell.com',                            lines: 464,   spend: 0.73   },
+    { user: 'claude-key-tk [API Key]',                                 lines: 448,   spend: 5.80   },
+    { user: 'claude_code_key_sindhupriya.murugesan_cwqk [API Key]',    lines: 431,   spend: 24.46  },
+    { user: 'cs-claude-key [API Key]',                                 lines: 347,   spend: 7.11   },
+    { user: 'claude_code_key_lawrence.norton_xlzk [API Key]',          lines: 27,    spend: 2.95   },
+    { user: 'brad.plies@vestwell.com',                                 lines: 16,    spend: 0.11   },
+    { user: 'zach.cotter@vestwell.com',                                lines: 4,     spend: 2.61   },
+    { user: 'claude_code_key_brad.plies_ipoj [API Key]',               lines: 0,     spend: 0.03   },
+    { user: 'claude_code_key_michael.dafferner_hzds [API Key]',        lines: 0,     spend: 3.62   },
+    { user: 'claude_code_key_gaya.long_qbbk [API Key]',                lines: 0,     spend: 0.92   },
+    { user: 'ariel.kemelman@vestwell.com',                             lines: 0,     spend: 0.32   },
+    { user: 'claude_code_key_gowthami.meesala_lbfv [API Key]',         lines: 0,     spend: 0.05   },
+    { user: 'jeff.gunderson@vestwell.com',                             lines: 0,     spend: 0.90   },
+  ],
+  '2026-05': [
+    { user: 'crobs-final-key [API Key]',                                          lines: 1965, spend: 21.33 },
+    { user: 'derek.nguyen@vestwell.com',                                          lines: 702,  spend: 1.97  },
+    { user: 'lawrence.norton@vestwell.com',                                       lines: 591,  spend: 11.64 },
+    { user: 'ariel.kemelman@vestwell.com',                                        lines: 493,  spend: 3.03  },
+    { user: 'adam.kirschner@vestwell.com',                                        lines: 196,  spend: 1.08  },
+    { user: 'sinan.topgul@vestwell.com',                                          lines: 177,  spend: 2.11  },
+    { user: 'thomas.whidden@vestwell.com',                                        lines: 119,  spend: 0.28  },
+    { user: 'claude_code_key_sindhupriya.murugesan_cwqk [API Key]',               lines: 53,   spend: 7.08  },
+    { user: 'd.soundarapandyan@vestwell.com',                                     lines: 26,   spend: 2.82  },
+    { user: 'trina-k-api-key [API Key]',                                          lines: 0,    spend: 0.00  },
+    { user: 'david.reyes@vestwell.com',                                           lines: 0,    spend: 2.80  },
+    { user: 'nikhil.nandakumar@vestwell.com',                                     lines: 0,    spend: 4.26  },
+    { user: 'claude-code-cli [API Key]',                                          lines: 0,    spend: 0.00  },
+    { user: 'alan.xian@vestwell.com',                                             lines: 0,    spend: 0.98  },
+    { user: 'tstevens-personal [API Key]',                                        lines: 0,    spend: 0.55  },
+  ],
+};
+
+const MONTHS = ['2026-01','2026-02','2026-03','2026-04','2026-05'];
+const MONTH_LABELS = { '2026-01':'Jan 2026','2026-02':'Feb 2026','2026-03':'Mar 2026','2026-04':'Apr 2026 (MTD)','2026-05':'May 2026 (MTD)' };
+
+// ─── STATE ─────────────────────────────────────────────────────────────────────
+let monthFrom = '2026-01';
+let monthTo = '2026-05';
+let userFilter = 'all';
+let charts = {};
+
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  const allUsers = new Set();
+  Object.values(CLAUDE_DATA).forEach(rows => rows.forEach(r => allUsers.add(r.user)));
+  const sel = document.getElementById('userFilter');
+  [...allUsers].sort().forEach(u => {
+    const o = document.createElement('option');
+    o.value = u; o.textContent = u.replace(' [API Key]','');
+    sel.appendChild(o);
+  });
+  render();
+}
+
+function resetFilters() {
+  monthFrom = '2026-01'; monthTo = '2026-05';
+  document.getElementById('monthFrom').value = monthFrom;
+  document.getElementById('monthTo').value = monthTo;
+  document.getElementById('userFilter').value = 'all';
+  userFilter = 'all';
+  render();
+}
+
+function getFilteredMonths() {
+  monthFrom = document.getElementById('monthFrom').value;
+  monthTo   = document.getElementById('monthTo').value;
+  userFilter = document.getElementById('userFilter').value;
+  return MONTHS.filter(m => m >= monthFrom && m <= monthTo);
+}
+
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'k';
+  return n.toString();
+}
+function fmtMoney(n) { return '$'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function avatarColor(name) {
+  const colors = ['#5b6af0','#7c3aed','#d97706','#238636','#e8334a','#0ea5e9','#ec4899','#14b8a6'];
+  let h = 0; for (const c of name) h = (h*31+c.charCodeAt(0))%colors.length;
+  return colors[h];
+}
+function initials(name) { return name.replace(' [API Key]','').split(/[@._-]/).filter(Boolean).map(p=>p[0]?.toUpperCase()||'').slice(0,2).join(''); }
+function isApiKey(name) { return name.includes('[API Key]'); }
+
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+function darkAxis() { return { ticks:{color:'#8b90b8',font:{size:11}}, grid:{color:'rgba(255,255,255,0.05)'} }; }
+
+// ─── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  renderClaude(document.getElementById('toolContent'));
+}
+
+function renderClaude(content) {
+  const months = getFilteredMonths();
+
+  // Aggregate data
+  const allRows = [];
+  months.forEach(m => {
+    (CLAUDE_DATA[m] || []).forEach(r => {
+      if (userFilter !== 'all' && r.user !== userFilter) return;
+      allRows.push({ ...r, month: m });
+    });
+  });
+
+  // Per-user totals
+  const userMap = {};
+  allRows.forEach(r => {
+    if (!userMap[r.user]) userMap[r.user] = { lines: 0, spend: 0, months: {} };
+    userMap[r.user].lines += r.lines;
+    userMap[r.user].spend += r.spend;
+    userMap[r.user].months[r.month] = { lines: r.lines, spend: r.spend };
+  });
+
+  const totalLines = allRows.reduce((s,r) => s+r.lines, 0);
+  const totalSpend = allRows.reduce((s,r) => s+r.spend, 0);
+  const activeUsers = Object.keys(userMap).length;
+  const totalMonths = months.length;
+
+  // MoM change (last full month vs prior)
+  const lastMonths = months.slice(-2);
+  let momLines = null;
+  if (lastMonths.length === 2) {
+    const a = (CLAUDE_DATA[lastMonths[0]]||[]).reduce((s,r)=>s+r.lines,0);
+    const b = (CLAUDE_DATA[lastMonths[1]]||[]).reduce((s,r)=>s+r.lines,0);
+    if (a > 0) momLines = ((b-a)/a*100).toFixed(0);
+  }
+
+  // Accept rate (from console: 98.6% for April 2026)
+  const acceptRate = '98.6%';
+
+  content.innerHTML = `
+    <div class="note">
+      📡 <strong>Claude Code — Live data</strong> from <strong>platform.claude.com</strong> ·
+      Showing <strong>${months.map(m=>MONTH_LABELS[m]).join(', ')}</strong> ·
+      Note: The console reports Lines of Code and Spend. Request counts are not surfaced by the admin UI.
+      ${months.includes('2026-04') ? ' · Apr 2026 is month-to-date (20 days, refreshed Apr 20).' : ''}
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi accent-top">
+        <div class="label">Lines of Code Generated</div>
+        <div class="value" style="color:#f59e0b">${fmt(totalLines)}</div>
+        <div class="sub">${totalMonths} month${totalMonths>1?'s':''} selected</div>
+        ${momLines !== null ? `<div class="trend ${momLines>=0?'up':'down'}">${momLines>=0?'▲':'▼'} ${Math.abs(momLines)}% vs prior month</div>` : ''}
+      </div>
+      <div class="kpi accent-top">
+        <div class="label">Total Spend</div>
+        <div class="value">${fmtMoney(totalSpend)}</div>
+        <div class="sub">estimated (console figures)</div>
+      </div>
+      <div class="kpi accent-top">
+        <div class="label">Active Users</div>
+        <div class="value">${activeUsers}</div>
+        <div class="sub">with activity in range</div>
+      </div>
+      <div class="kpi accent-top">
+        <div class="label">Suggestion Accept Rate</div>
+        <div class="value" style="color:#3fb950">${acceptRate}</div>
+        <div class="sub">Apr 2026 (latest month)</div>
+      </div>
+      <div class="kpi accent-top">
+        <div class="label">Avg Lines / User</div>
+        <div class="value">${activeUsers > 0 ? fmt(Math.round(totalLines/activeUsers)) : '—'}</div>
+        <div class="sub">across selected range</div>
+      </div>
+      <div class="kpi accent-top">
+        <div class="label">Avg Spend / User</div>
+        <div class="value">${activeUsers > 0 ? fmtMoney(totalSpend/activeUsers) : '—'}</div>
+        <div class="sub">across selected range</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="card">
+        <h3>Lines of Code Generated — Monthly</h3>
+        <div style="height:220px"><canvas id="timelineChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Monthly Spend ($)</h3>
+        <div style="height:220px"><canvas id="spendChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row-3">
+      <div class="card">
+        <h3>Lines of Code by User (total in range)</h3>
+        <div style="height:240px"><canvas id="userLinesChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Lines Share by User</h3>
+        <div style="height:240px"><canvas id="pieChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <h3>User Breakdown · All Months</h3>
+      <div class="table-scroll">
+        <table id="mainTable">
+          <thead>
+            <tr>
+              <th>User</th>
+              ${months.map(m=>`<th>${MONTH_LABELS[m]} Lines</th><th>Spend</th>`).join('')}
+              <th>Total Lines ↓</th>
+              <th>Total Spend</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // Re-render charts after DOM update
+  setTimeout(() => {
+    renderTimelineChart(months);
+    renderSpendChart(months);
+    renderUserLinesChart(userMap);
+    renderPieChart(userMap);
+    renderTable(userMap, months);
+  }, 0);
+}
+
+function renderTimelineChart(months) {
+  destroyChart('timeline');
+  const totals = months.map(m => (CLAUDE_DATA[m]||[]).reduce((s,r)=>s+r.lines,0));
+  const ctx = document.getElementById('timelineChart');
+  if (!ctx) return;
+  charts.timeline = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months.map(m=>MONTH_LABELS[m]),
+      datasets: [{
+        label: 'Lines of Code',
+        data: totals,
+        backgroundColor: 'rgba(217,119,6,0.7)',
+        borderColor: '#d97706',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${fmt(c.raw)} lines` } } },
+      scales: { x: darkAxis(), y: { ...darkAxis(), ticks: { ...darkAxis().ticks, callback: v => fmt(v) } } }
+    }
+  });
+}
+
+function renderSpendChart(months) {
+  destroyChart('spend');
+  const totals = months.map(m => parseFloat((CLAUDE_DATA[m]||[]).reduce((s,r)=>s+r.spend,0).toFixed(2)));
+  const ctx = document.getElementById('spendChart');
+  if (!ctx) return;
+  charts.spend = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months.map(m=>MONTH_LABELS[m]),
+      datasets: [{
+        label: 'Spend',
+        data: totals,
+        backgroundColor: 'rgba(91,106,240,0.7)',
+        borderColor: '#5b6af0',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` $${c.raw.toFixed(2)}` } } },
+      scales: { x: darkAxis(), y: { ...darkAxis(), ticks: { ...darkAxis().ticks, callback: v => '$'+v } } }
+    }
+  });
+}
+
+function renderUserLinesChart(userMap) {
+  destroyChart('userLines');
+  const sorted = Object.entries(userMap).sort((a,b) => b[1].lines - a[1].lines).slice(0, 12);
+  const ctx = document.getElementById('userLinesChart');
+  if (!ctx) return;
+  charts.userLines = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sorted.map(([u]) => u.replace('@vestwell.com','').replace(' [API Key]',' 🔑')),
+      datasets: [{
+        label: 'Lines',
+        data: sorted.map(([,v]) => v.lines),
+        backgroundColor: sorted.map(([u]) => avatarColor(u)+'bb'),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${fmt(c.raw)} lines` } } },
+      scales: {
+        x: { ...darkAxis(), ticks: { ...darkAxis().ticks, callback: v => fmt(v) } },
+        y: { ticks: { color: '#8b90b8', font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderPieChart(userMap) {
+  destroyChart('pie');
+  const sorted = Object.entries(userMap).sort((a,b) => b[1].lines - a[1].lines).slice(0, 8);
+  const ctx = document.getElementById('pieChart');
+  if (!ctx) return;
+  charts.pie = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: sorted.map(([u]) => u.replace('@vestwell.com','').replace(' [API Key]',' 🔑')),
+      datasets: [{ data: sorted.map(([,v]) => v.lines), backgroundColor: sorted.map(([u]) => avatarColor(u)), borderWidth: 2, borderColor: '#1a1d27' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#8b90b8', boxWidth: 10, font: { size: 10 }, padding: 8 } },
+        tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)} lines` } }
+      }
+    }
+  });
+}
+
+function renderTable(userMap, months) {
+  const tbody = document.getElementById('tableBody');
+  if (!tbody) return;
+  const maxLines = Math.max(...Object.values(userMap).map(v=>v.lines), 1);
+  const sorted = Object.entries(userMap).sort((a,b) => b[1].lines - a[1].lines);
+  tbody.innerHTML = sorted.map(([user, totals]) => {
+    const color = avatarColor(user);
+    const init  = initials(user);
+    const displayName = user.replace('@vestwell.com', '').replace(' [API Key]', '');
+    return `<tr>
+      <td>
+        <div class="user-cell">
+          <div class="avatar" style="background:${color}">${init}</div>
+          <div>
+            <div>${displayName}${isApiKey(user)?'<span class="api-tag">API Key</span>':''}</div>
+            ${!isApiKey(user)?`<div style="font-size:10px;color:var(--text-muted)">${user}</div>`:''}
+          </div>
+        </div>
+      </td>
+      ${months.map(m => {
+        const md = totals.months[m];
+        return `<td>${md ? fmt(md.lines) : '<span style="color:var(--text-muted)">—</span>'}</td><td>${md ? fmtMoney(md.spend) : '<span style="color:var(--text-muted)">—</span>'}</td>`;
+      }).join('')}
+      <td>
+        <div class="bar-cell">
+          <div class="mini-bar" style="width:${Math.round(totals.lines/maxLines*70)}px;background:${color}"></div>
+          <strong>${fmt(totals.lines)}</strong>
+        </div>
+      </td>
+      <td>${fmtMoney(totals.spend)}</td>
+    </tr>`;
+  }).join('');
+}
+
+init();
+</script>
+</body>
+</html>
