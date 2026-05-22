@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claude Metrics &mdash; 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #181b22;
+    --border: #262a33;
+    --text: #e7ebf3;
+    --muted: #8a93a6;
+    --accent: #d4a373;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 24px; }
+  h1 { margin: 0 0 4px; font-size: 24px; }
+  .subtitle { color: var(--muted); margin-bottom: 24px; font-size: 13px; }
+  .note { color: var(--muted); font-size: 12px; margin-bottom: 16px; font-style: italic; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 20px; }
+  .panel h2 { font-size: 15px; margin: 0 0 12px; color: var(--text); font-weight: 600; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .kpi .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  .kpi .value { font-size: 24px; font-weight: 600; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--muted); font-weight: 500; background: #1c1f27; position: sticky; top: 0; }
+  td.name { font-weight: 500; }
+  td.total { font-weight: 600; color: var(--accent); }
+  tfoot td { font-weight: 600; border-top: 2px solid var(--border); border-bottom: none; }
+  .table-wrap { max-height: 520px; overflow-y: auto; overflow-x: auto; }
+  canvas { max-height: 360px; }
+</style>
+</head>
+<body>
+  <h1>Claude Metrics &mdash; 2026</h1>
+  <div class="subtitle">Generated 2026-05-22T04:10:31+00:00 &bull; data through 2026-05-22</div>
+  <div class="note">Note: the Anthropic Admin API reports token usage rather than raw request counts; totals shown reflect total tokens (input + cache + output) per the messages usage report.</div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Total Tokens</div><div class="value">24,828,309,353</div></div>
+    <div class="kpi"><div class="label">Active Users</div><div class="value">39</div></div>
+    <div class="kpi"><div class="label">Team Members</div><div class="value">64</div></div>
+    <div class="kpi"><div class="label">Models In Use</div><div class="value">8</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Tokens by Month</h2>
+      <canvas id="monthChart"></canvas>
+    </div>
+    <div class="panel">
+      <h2>Tokens by Model</h2>
+      <canvas id="modelChart"></canvas>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Tokens per User by Month</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>January</th><th>February</th><th>March</th><th>April</th><th>May</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+<tr><td class='name'>Moshe Bildner</td><td>459,090,800</td><td>1,136,881,303</td><td>0</td><td>1,144,830,658</td><td>1,258,368,330</td><td class='total'>3,999,171,091</td></tr>
+<tr><td class='name'>Adam S. Kirschner</td><td>0</td><td>0</td><td>0</td><td>493,960,571</td><td>2,474,923,121</td><td class='total'>2,968,883,692</td></tr>
+<tr><td class='name'>Lawrence Norton</td><td>0</td><td>0</td><td>0</td><td>95,445,411</td><td>1,142,525,032</td><td class='total'>1,237,970,443</td></tr>
+<tr><td class='name'>Sinan Topgul</td><td>0</td><td>0</td><td>0</td><td>381,549,119</td><td>294,746,708</td><td class='total'>676,295,827</td></tr>
+<tr><td class='name'>Anthony</td><td>0</td><td>0</td><td>0</td><td>195,347,913</td><td>207,141,913</td><td class='total'>402,489,826</td></tr>
+<tr><td class='name'>Harshitha</td><td>0</td><td>0</td><td>0</td><td>164,385,429</td><td>219,384,050</td><td class='total'>383,769,479</td></tr>
+<tr><td class='name'>Dhanush Soundarapandyan</td><td>69,839,931</td><td>19,216,161</td><td>0</td><td>70,460,451</td><td>175,824,268</td><td class='total'>335,340,811</td></tr>
+<tr><td class='name'>Thomas Whidden</td><td>0</td><td>0</td><td>0</td><td>74,454,747</td><td>240,893,131</td><td class='total'>315,347,878</td></tr>
+<tr><td class='name'>Alan</td><td>0</td><td>0</td><td>0</td><td>166,780,125</td><td>141,180,766</td><td class='total'>307,960,891</td></tr>
+<tr><td class='name'>Trina King</td><td>0</td><td>0</td><td>0</td><td>16,221</td><td>303,395,603</td><td class='total'>303,411,824</td></tr>
+<tr><td class='name'>David Reyes</td><td>0</td><td>0</td><td>0</td><td>183,962,336</td><td>113,928,776</td><td class='total'>297,891,112</td></tr>
+<tr><td class='name'>Michael Dafferner</td><td>0</td><td>0</td><td>0</td><td>236,550,325</td><td>23,916,767</td><td class='total'>260,467,092</td></tr>
+<tr><td class='name'>Nikhil Nandakumar</td><td>0</td><td>0</td><td>0</td><td>49,345,433</td><td>190,049,004</td><td class='total'>239,394,437</td></tr>
+<tr><td class='name'>David Smith</td><td>0</td><td>0</td><td>0</td><td>70,212,974</td><td>127,568,229</td><td class='total'>197,781,203</td></tr>
+<tr><td class='name'>Clayton Howeth</td><td>0</td><td>0</td><td>0</td><td>61,106,306</td><td>66,411,179</td><td class='total'>127,517,485</td></tr>
+<tr><td class='name'>Derek Nguyen</td><td>0</td><td>0</td><td>0</td><td>55,167,057</td><td>38,249,216</td><td class='total'>93,416,273</td></tr>
+<tr><td class='name'>Zachary Cotter</td><td>0</td><td>0</td><td>0</td><td>4,095,496</td><td>64,289,494</td><td class='total'>68,384,990</td></tr>
+<tr><td class='name'>Manuel Rueda</td><td>0</td><td>0</td><td>0</td><td>16,824,649</td><td>44,998,175</td><td class='total'>61,822,824</td></tr>
+<tr><td class='name'>Ariel Kemelman</td><td>0</td><td>0</td><td>0</td><td>3,332,064</td><td>51,688,950</td><td class='total'>55,021,014</td></tr>
+<tr><td class='name'>Sindhupriya Murugesan</td><td>0</td><td>0</td><td>0</td><td>19,859,511</td><td>23,392,466</td><td class='total'>43,251,977</td></tr>
+<tr><td class='name'>X</td><td>0</td><td>0</td><td>0</td><td>0</td><td>42,980,796</td><td class='total'>42,980,796</td></tr>
+<tr><td class='name'>Gowthami Meesala</td><td>0</td><td>0</td><td>0</td><td>670,950</td><td>24,567,343</td><td class='total'>25,238,293</td></tr>
+<tr><td class='name'>(unknown)</td><td>0</td><td>0</td><td>0</td><td>17,063,210</td><td>0</td><td class='total'>17,063,210</td></tr>
+<tr><td class='name'>Philip Ramunno</td><td>0</td><td>0</td><td>0</td><td>0</td><td>4,754,767</td><td class='total'>4,754,767</td></tr>
+<tr><td class='name'>Jeff Gunderson</td><td>0</td><td>0</td><td>0</td><td>2,886,489</td><td>22,821</td><td class='total'>2,909,310</td></tr>
+<tr><td class='name'>Brandon Konoiko</td><td>0</td><td>0</td><td>0</td><td>898,318</td><td>909,788</td><td class='total'>1,808,106</td></tr>
+<tr><td class='name'>Travis Stevens</td><td>0</td><td>26,916</td><td>0</td><td>947,156</td><td>251,485</td><td class='total'>1,225,557</td></tr>
+<tr><td class='name'>(unknown)</td><td>212,637</td><td>635,300</td><td>0</td><td>0</td><td>0</td><td class='total'>847,937</td></tr>
+<tr><td class='name'>Ryan Anderson</td><td>0</td><td>0</td><td>0</td><td>420,744</td><td>256,230</td><td class='total'>676,974</td></tr>
+<tr><td class='name'>Scott Yin</td><td>0</td><td>0</td><td>0</td><td>646,861</td><td>0</td><td class='total'>646,861</td></tr>
+<tr><td class='name'>Gaya.long</td><td>0</td><td>0</td><td>0</td><td>0</td><td>361,409</td><td class='total'>361,409</td></tr>
+<tr><td class='name'>Nikki W.</td><td>69,201</td><td>31,520</td><td>0</td><td>0</td><td>0</td><td class='total'>100,721</td></tr>
+<tr><td class='name'>Kieth Stoeck</td><td>0</td><td>0</td><td>0</td><td>81,744</td><td>0</td><td class='total'>81,744</td></tr>
+<tr><td class='name'>Feeley</td><td>0</td><td>0</td><td>0</td><td>74,555</td><td>0</td><td class='total'>74,555</td></tr>
+<tr><td class='name'>Bhagyaraj Jhala</td><td>0</td><td>0</td><td>0</td><td>39,364</td><td>0</td><td class='total'>39,364</td></tr>
+<tr><td class='name'>(unknown)</td><td>0</td><td>0</td><td>0</td><td>26,229</td><td>0</td><td class='total'>26,229</td></tr>
+<tr><td class='name'>Hamza Khan</td><td>0</td><td>0</td><td>0</td><td>0</td><td>16,929</td><td class='total'>16,929</td></tr>
+<tr><td class='name'>Tariq Rahiman</td><td>0</td><td>0</td><td>0</td><td>8,437</td><td>0</td><td class='total'>8,437</td></tr>
+<tr><td class='name'>(unknown)</td><td>0</td><td>7,875</td><td>0</td><td>0</td><td>0</td><td class='total'>7,875</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Total</td><td>573,742,764</td><td>1,549,726,515</td><td>4,419,006,429</td><td>6,899,306,837</td><td>11,386,526,808</td><td>24,828,309,353</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Tokens per User by Model</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>claude-sonnet-4-6</th><th>claude-opus-4-6</th><th>claude-opus-4-7</th><th>claude-haiku-4-5</th><th>claude-sonnet-4-5</th><th>claude-opus-4-5</th><th>claude-3-5-haiku</th><th>claude-sonnet-4</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+<tr><td class='name'>Moshe Bildner</td><td>1,632,180,140</td><td>28,748,510</td><td>639,280,879</td><td>225,330,842</td><td>1,473,630,720</td><td>0</td><td>0</td><td>0</td><td class='total'>3,999,171,091</td></tr>
+<tr><td class='name'>Adam S. Kirschner</td><td>2,797,456,378</td><td>0</td><td>129,339,498</td><td>42,087,816</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>2,968,883,692</td></tr>
+<tr><td class='name'>Lawrence Norton</td><td>1,151,963,811</td><td>4,502,603</td><td>4,298,984</td><td>77,205,045</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>1,237,970,443</td></tr>
+<tr><td class='name'>Sinan Topgul</td><td>595,513,537</td><td>3,831,906</td><td>1,357,004</td><td>75,593,380</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>676,295,827</td></tr>
+<tr><td class='name'>Anthony</td><td>204,408,705</td><td>17,020,841</td><td>156,830,582</td><td>24,229,698</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>402,489,826</td></tr>
+<tr><td class='name'>Harshitha</td><td>83,292,701</td><td>0</td><td>0</td><td>11,348,479</td><td>289,128,299</td><td>0</td><td>0</td><td>0</td><td class='total'>383,769,479</td></tr>
+<tr><td class='name'>Dhanush Soundarapandyan</td><td>228,057,589</td><td>0</td><td>4,373,996</td><td>19,634,661</td><td>83,131,424</td><td>0</td><td>143,141</td><td>0</td><td class='total'>335,340,811</td></tr>
+<tr><td class='name'>Thomas Whidden</td><td>17,922,515</td><td>216,296,457</td><td>44,442,981</td><td>36,685,925</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>315,347,878</td></tr>
+<tr><td class='name'>Alan</td><td>76,676,532</td><td>18,040,257</td><td>206,341,742</td><td>6,902,360</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>307,960,891</td></tr>
+<tr><td class='name'>Trina King</td><td>258,295,725</td><td>0</td><td>41,935,978</td><td>3,180,121</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>303,411,824</td></tr>
+<tr><td class='name'>David Reyes</td><td>150,532,045</td><td>86,145,208</td><td>7,760,577</td><td>53,453,282</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>297,891,112</td></tr>
+<tr><td class='name'>Michael Dafferner</td><td>0</td><td>6,136,665</td><td>236,833,467</td><td>17,496,960</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>260,467,092</td></tr>
+<tr><td class='name'>Nikhil Nandakumar</td><td>103,167,787</td><td>42,252,228</td><td>92,691,706</td><td>1,282,716</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>239,394,437</td></tr>
+<tr><td class='name'>David Smith</td><td>70,451,693</td><td>0</td><td>119,707,113</td><td>7,622,397</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>197,781,203</td></tr>
+<tr><td class='name'>Clayton Howeth</td><td>121,489,389</td><td>0</td><td>2,984,651</td><td>3,043,445</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>127,517,485</td></tr>
+<tr><td class='name'>Derek Nguyen</td><td>60,520,183</td><td>0</td><td>20,770,167</td><td>12,125,923</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>93,416,273</td></tr>
+<tr><td class='name'>Zachary Cotter</td><td>58,895,239</td><td>465,491</td><td>0</td><td>9,024,260</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>68,384,990</td></tr>
+<tr><td class='name'>Manuel Rueda</td><td>28,322,545</td><td>0</td><td>30,999,703</td><td>2,500,576</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>61,822,824</td></tr>
+<tr><td class='name'>Ariel Kemelman</td><td>8,041,110</td><td>0</td><td>23,750,336</td><td>23,229,568</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>55,021,014</td></tr>
+<tr><td class='name'>Sindhupriya Murugesan</td><td>35,923,130</td><td>0</td><td>1,112,350</td><td>6,216,497</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>43,251,977</td></tr>
+<tr><td class='name'>X</td><td>80,203</td><td>0</td><td>42,877,011</td><td>23,582</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>42,980,796</td></tr>
+<tr><td class='name'>Gowthami Meesala</td><td>2,769,737</td><td>0</td><td>22,377,242</td><td>91,314</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>25,238,293</td></tr>
+<tr><td class='name'>(unknown)</td><td>12,116,091</td><td>0</td><td>0</td><td>4,947,119</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>17,063,210</td></tr>
+<tr><td class='name'>Philip Ramunno</td><td>0</td><td>0</td><td>4,754,286</td><td>481</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>4,754,767</td></tr>
+<tr><td class='name'>Jeff Gunderson</td><td>453,767</td><td>0</td><td>0</td><td>2,455,543</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>2,909,310</td></tr>
+<tr><td class='name'>Brandon Konoiko</td><td>658,566</td><td>0</td><td>0</td><td>1,149,540</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>1,808,106</td></tr>
+<tr><td class='name'>Travis Stevens</td><td>631,778</td><td>8,821</td><td>566,863</td><td>0</td><td>18,095</td><td>0</td><td>0</td><td>0</td><td class='total'>1,225,557</td></tr>
+<tr><td class='name'>(unknown)</td><td>0</td><td>0</td><td>0</td><td>1,421</td><td>846,399</td><td>0</td><td>117</td><td>0</td><td class='total'>847,937</td></tr>
+<tr><td class='name'>Ryan Anderson</td><td>638,959</td><td>0</td><td>38,015</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>676,974</td></tr>
+<tr><td class='name'>Scott Yin</td><td>646,861</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>646,861</td></tr>
+<tr><td class='name'>Gaya.long</td><td>360,615</td><td>0</td><td>0</td><td>794</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>361,409</td></tr>
+<tr><td class='name'>Nikki W.</td><td>0</td><td>0</td><td>0</td><td>0</td><td>100,721</td><td>0</td><td>0</td><td>0</td><td class='total'>100,721</td></tr>
+<tr><td class='name'>Kieth Stoeck</td><td>77,180</td><td>0</td><td>4,564</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>81,744</td></tr>
+<tr><td class='name'>Feeley</td><td>74,537</td><td>0</td><td>0</td><td>18</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>74,555</td></tr>
+<tr><td class='name'>Bhagyaraj Jhala</td><td>39,364</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>39,364</td></tr>
+<tr><td class='name'>(unknown)</td><td>0</td><td>0</td><td>7,377</td><td>0</td><td>18,852</td><td>0</td><td>0</td><td>0</td><td class='total'>26,229</td></tr>
+<tr><td class='name'>Hamza Khan</td><td>0</td><td>0</td><td>9,238</td><td>0</td><td>7,691</td><td>0</td><td>0</td><td>0</td><td class='total'>16,929</td></tr>
+<tr><td class='name'>Tariq Rahiman</td><td>0</td><td>0</td><td>8,437</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td class='total'>8,437</td></tr>
+<tr><td class='name'>(unknown)</td><td>0</td><td>0</td><td>0</td><td>0</td><td>7,875</td><td>0</td><td>0</td><td>0</td><td class='total'>7,875</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Total</td><td>15,743,367,100</td><td>2,566,488,630</td><td>2,398,318,558</td><td>2,088,098,487</td><td>2,028,409,053</td><td>2,900,397</td><td>648,719</td><td>78,409</td><td>24,828,309,353</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+<script>
+const monthData = {"labels": ["January", "February", "March", "April", "May"], "values": [573742764, 1549726515, 4419006429, 6899306837, 11386526808]};
+const modelData = {"labels": ["claude-sonnet-4-6", "claude-opus-4-6", "claude-opus-4-7", "claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5", "claude-3-5-haiku", "claude-sonnet-4"], "values": [15743367100, 2566488630, 2398318558, 2088098487, 2028409053, 2900397, 648719, 78409]};
+
+const palette = [
+  '#d4a373', '#7c9cff', '#9b85ff', '#5db5a8', '#e07a7a',
+  '#f0c674', '#a3c585', '#c78bd9', '#6ab0d8', '#e89c5a',
+  '#b07e5d', '#5a7fbf'
+];
+
+new Chart(document.getElementById('monthChart'), {
+  type: 'bar',
+  data: {
+    labels: monthData.labels,
+    datasets: [{
+      label: 'Total Tokens',
+      data: monthData.values,
+      backgroundColor: '#d4a373',
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#8a93a6' }, grid: { color: '#262a33' } },
+      y: { ticks: { color: '#8a93a6', callback: v => v.toLocaleString() }, grid: { color: '#262a33' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('modelChart'), {
+  type: 'pie',
+  data: {
+    labels: modelData.labels,
+    datasets: [{
+      data: modelData.values,
+      backgroundColor: palette.slice(0, modelData.labels.length),
+      borderColor: '#0f1115',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { position: 'right', labels: { color: '#e7ebf3', font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed.toLocaleString()}` } }
+    }
+  }
+});
+</script>
+</body>
+</html>
